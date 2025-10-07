@@ -98,7 +98,7 @@ body {
     color: inherit;
 }
 
-.add-btn {
+.add-btn, .edit-btn {
     background-color: #ff385c;
     border: none;
 }
