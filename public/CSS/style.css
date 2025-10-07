@@ -3,6 +3,13 @@ body {
     font-family: "Plus Jakarta Sans", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;  
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1;
 }
 
 .navbar {
@@ -89,4 +96,9 @@ body {
 .listing-link {
     text-decoration: none;
     color: inherit;
+}
+
+.add-btn {
+    background-color: #ff385c;
+    border: none;
 }
