@@ -1,0 +1,21 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-3">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+
+      <div class="alert alert-danger d-flex align-items-center shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-3"></i>
+        <div>
+          <strong>Error!</strong>
+          <p class="mb-0"><%= message %></p>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <a href="/listings" class="btn btn-sm btn-danger">Back to Listings</a>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -2,7 +2,7 @@
 <body>
   <div class="row d-flex justify-content-center align-items-center">
     <div class="col-8 col-md-6">
-      <h3>Listing Details :</h3>
+      <h3><%= listing.title %> </h3>
 
       <div class="card">
         <img
@@ -12,8 +12,8 @@
         />
         <div class="card-body">
           <p class="card-text">
-            <b><%= listing.title %> </b> <br />
-            ₹<%= listing.price.toLocaleString("en-IN") %> / night <br />
+
+            ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> / night <br />
             <%= listing.description %> <br />
             <%= listing.location %> <br />
             <%= listing.country %> <br />
