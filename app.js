@@ -7,9 +7,8 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./ExpressError");
 const asyncWrap = require("./utils/asyncWrap.js");
-const { listingSchema } = require("./schema.js");
-const Review = require("./models/review.js")
-
+const { listingSchema, reviewSchema } = require("./schema.js");
+const Review = require("./models/review.js");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -37,13 +36,22 @@ app.get("/", (req, res) => {
 });
 
 const validateListing = (req, res, next) => {
-    let {error} = listingSchema.validate(req.body);
-    if (error) {
-        let msg = error.details.map(el => el.message).join(", ");
-        throw new ExpressError(400, msg);
-    } else {
-        next();
-    }
+  let { error } = listingSchema.validate(req.body);
+  if (error) {
+    let msg = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, msg);
+  } else {
+    next();
+  }
+};
+const validateReview = (req, res, next) => {
+  let { error } = reviewSchema.validate(req.body);
+  if (error) {
+    let msg = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, msg);
+  } else {
+    next();
+  }
 };
 
 // app.get("/testListing", async (req,res) => {
@@ -80,11 +88,11 @@ app.get(
   asyncWrap(async (req, res) => {
     let { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new ExpressError(400, "Invalid listing id");
+      throw new ExpressError(400, "Invalid listing id");
     }
     const listing = await Listing.findById(id);
-    if(!listing) {
-        throw new ExpressError(404, "Listing Not Found");
+    if (!listing) {
+      throw new ExpressError(404, "Listing Not Found");
     }
     res.render("listings/show", { listing });
   })
@@ -101,7 +109,8 @@ app.get(
 );
 
 app.put(
-  "/listings/:id", validateListing,
+  "/listings/:id",
+  validateListing,
   asyncWrap(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, req.body.listing);
@@ -121,20 +130,21 @@ app.delete(
 );
 
 //Reviews
-app.post("listings/:id/reviews", async(req,res) => {
-    let listing = await Listing.findById(req.params.id);
-    let newReview = new Review(req.body.review);
+app.post("listings/:id/reviews", validateReview, asyncWrap (async (req, res) => {
+  let listing = await Listing.findById(req.params.id);
+  let newReview = new Review(req.body.review);
 
-    listing.reviews.push[newReview];
-    await newReview.save();
-    await listing.save();
+  listing.reviews.push[newReview];
+  await newReview.save();
+  await listing.save();
 
-    console.log("new review saved");
-    res.send("new review saved"); 
-});
+  console.log("new review saved");
+  res.send("new review saved");
+}));
 
 app.post(
-  "/listings", validateListing,
+  "/listings",
+  validateListing,
   asyncWrap(async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
@@ -150,8 +160,8 @@ app.all(/.*/, (req, res, next) => {
 app.use((err, req, res, next) => {
   let { status = 500, message = "Something went wrong!" } = err;
   console.dir(err);
-  res.status(status).render("listings/error", {message});
-//   res.status(status).send(message);
+  res.status(status).render("listings/error", { message });
+  //   res.status(status).send(message);
 });
 
 app.listen(8080, () => {
