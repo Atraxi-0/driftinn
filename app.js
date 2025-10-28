@@ -7,7 +7,8 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./ExpressError");
 const asyncWrap = require("./utils/asyncWrap.js");
-const { listingSchema } = require("./schema.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
+const Review = require("./models/review.js");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -35,13 +36,22 @@ app.get("/", (req, res) => {
 });
 
 const validateListing = (req, res, next) => {
-    let {error} = listingSchema.validate(req.body);
-    if (error) {
-        let msg = error.details.map(el => el.message).join(", ");
-        throw new ExpressError(400, msg);
-    } else {
-        next();
-    }
+  let { error } = listingSchema.validate(req.body);
+  if (error) {
+    let msg = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, msg);
+  } else {
+    next();
+  }
+};
+const validateReview = (req, res, next) => {
+  let { error } = reviewSchema.validate(req.body);
+  if (error) {
+    let msg = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, msg);
+  } else {
+    next();
+  }
 };
 
 // app.get("/testListing", async (req,res) => {
@@ -78,11 +88,11 @@ app.get(
   asyncWrap(async (req, res) => {
     let { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new ExpressError(400, "Invalid listing id");
+      throw new ExpressError(400, "Invalid listing id");
     }
-    const listing = await Listing.findById(id);
-    if(!listing) {
-        throw new ExpressError(404, "Listing Not Found");
+    const listing = await Listing.findById(id).populate("reviews");
+    if (!listing) {
+      throw new ExpressError(404, "Listing Not Found");
     }
     res.render("listings/show", { listing });
   })
@@ -99,7 +109,8 @@ app.get(
 );
 
 app.put(
-  "/listings/:id", validateListing,
+  "/listings/:id",
+  validateListing,
   asyncWrap(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, req.body.listing);
@@ -118,8 +129,47 @@ app.delete(
   })
 );
 
+//Create Reviews
 app.post(
-  "/listings", validateListing,
+  "/listings/:id/reviews",
+  validateReview,
+  asyncWrap(async (req, res) => {
+    const { id } = req.params;
+
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      req.flash("error", "Listing not found!");
+      return res.redirect("/listings");
+    }
+
+    const newReview = new Review(req.body.review);
+    listing.reviews.push(newReview);
+
+    await newReview.save();
+    await listing.save();
+
+    console.log("New review saved successfully");
+    res.redirect(`/listings/${id}`);
+  })
+);
+
+//Delete Reviews
+app.delete(
+  "/listings/:listingId/reviews/:reviewId",
+  asyncWrap(async (req, res) => {
+    const { listingId, reviewId } = req.params;
+    await Listing.findByIdAndUpdate(listingId, {
+      $pull: { reviews: reviewId },
+    });
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/listings/${listingId}`);
+  })
+);
+
+//Post Create new
+app.post(
+  "/listings",
+  validateListing,
   asyncWrap(async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
@@ -135,8 +185,8 @@ app.all(/.*/, (req, res, next) => {
 app.use((err, req, res, next) => {
   let { status = 500, message = "Something went wrong!" } = err;
   console.dir(err);
-  res.status(status).render("listings/error", {message});
-//   res.status(status).send(message);
+  res.status(status).render("listings/error", { message });
+  //   res.status(status).send(message);
 });
 
 app.listen(8080, () => {
