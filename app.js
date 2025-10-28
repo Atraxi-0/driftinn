@@ -90,7 +90,7 @@ app.get(
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new ExpressError(400, "Invalid listing id");
     }
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).populate("reviews");
     if (!listing) {
       throw new ExpressError(404, "Listing Not Found");
     }
@@ -129,19 +129,44 @@ app.delete(
   })
 );
 
-//Reviews
-app.post("listings/:id/reviews", validateReview, asyncWrap (async (req, res) => {
-  let listing = await Listing.findById(req.params.id);
-  let newReview = new Review(req.body.review);
+//Create Reviews
+app.post(
+  "/listings/:id/reviews",
+  validateReview,
+  asyncWrap(async (req, res) => {
+    const { id } = req.params;
 
-  listing.reviews.push[newReview];
-  await newReview.save();
-  await listing.save();
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      req.flash("error", "Listing not found!");
+      return res.redirect("/listings");
+    }
 
-  console.log("new review saved");
-  res.send("new review saved");
-}));
+    const newReview = new Review(req.body.review);
+    listing.reviews.push(newReview);
 
+    await newReview.save();
+    await listing.save();
+
+    console.log("New review saved successfully");
+    res.redirect(`/listings/${id}`);
+  })
+);
+
+//Delete Reviews
+app.delete(
+  "/listings/:listingId/reviews/:reviewId",
+  asyncWrap(async (req, res) => {
+    const { listingId, reviewId } = req.params;
+    await Listing.findByIdAndUpdate(listingId, {
+      $pull: { reviews: reviewId },
+    });
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/listings/${listingId}`);
+  })
+);
+
+//Post Create new
 app.post(
   "/listings",
   validateListing,

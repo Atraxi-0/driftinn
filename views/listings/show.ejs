@@ -2,7 +2,7 @@
 <body>
   <div class="row d-flex justify-content-center align-items-center">
     <div class="col-8 col-md-6">
-      <h3><%= listing.title %> </h3>
+      <h3><%= listing.title %></h3>
 
       <div class="card">
         <img
@@ -12,8 +12,8 @@
         />
         <div class="card-body">
           <p class="card-text">
-
-            ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> / night <br />
+            ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A"
+            %> / night <br />
             <%= listing.description %> <br />
             <%= listing.location %> <br />
             <%= listing.country %> <br />
@@ -38,22 +38,76 @@
       </div>
     </div>
 
-            <div class = "col-8 offset-2">
-              <hr>
-              <h4>Leave a Review</h4>
-              <form action="/listings/<%= listing.id %>/reviews" method="post" novalidate class="needs-validation">
-                <div class="mb-3 mt-3">
-                  <label for="rating" class="form-label">rating</label>
-                  <input type="range" class="form-range"  min="1" max="5" id="rating" name="review[rating]" required>
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="comment" class="form-label">Comments</label>
-                  <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" required></textarea>
-                  <div class="invalid-feedback">Please enter your comment for the review.</div>
-                </div>
-                <button class="btn btn-outline-dark">Submit</button>
-              </form>
-            </div>
+    <div class="col-8 offset-2">
+      <hr />
+      <h4>Leave a Review</h4>
+      <form
+        action="/listings/<%= listing.id %>/reviews"
+        method="post"
+        novalidate
+        class="needs-validation"
+      >
+        <div class="mb-3 mt-3">
+          <label for="rating" class="form-label">rating</label>
+          <input
+            type="range"
+            class="form-range"
+            min="1"
+            max="5"
+            id="rating"
+            name="review[rating]"
+            required
+          />
+        </div>
+        <div class="mb-3 mt-3">
+          <label for="comment" class="form-label">Comments</label>
+          <textarea
+            name="review[comment]"
+            id="comment"
+            cols="30"
+            rows="5"
+            class="form-control"
+            required
+          ></textarea>
+          <div class="invalid-feedback">
+            Please enter your comment for the review.
+          </div>
+        </div>
+        <button class="btn btn-outline-dark">Submit</button>
+      </form>
+      <hr />
+      <h4 class="mt-4 mb-3">All Reviews</h4>
 
+      <div class="row">
+        <% if (listing.reviews && listing.reviews.length > 0) { %> <% for (let
+        review of listing.reviews) { %>
+        <div class="col-md-6 mb-3">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted">
+                <i class="bi bi-person-circle"></i> <%= review.author ?
+                review.author.username : "Anonymous" %>
+              </h6>
+              <p class="card-text mb-1">⭐ <%= review.rating %> / 5</p>
+              <p class="card-text">"<%= review.comment %>"</p>
+              <small class="text-muted">
+                Posted on <%= review.createdAt ? review.createdAt.toDateString()
+                : "N/A" %>
+              </small>
+             </div>
+
+             <form method="POST" class="" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                <button class="btn btn-sm btn-outline-secondary ms -3 mb-3">Delete Review</button>
+             </form>
+
+          </div>
+        </div>
+        <% } %> <% } else { %>
+        <p class="text-muted">
+          No reviews yet. Be the first to review this listing!
+        </p>
+        <% } %>
+      </div>
+    </div>
   </div>
 </body>
