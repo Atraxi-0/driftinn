@@ -10,8 +10,8 @@ module.exports.listingSchema = joi.object({
       country: joi.string().required(),
       image: joi
         .object({
-          filename: joi.string().allow("", null),
           url: joi.string().uri().allow("", null),
+          filename: joi.string().allow("", null),
         })
         .optional(),
     })
