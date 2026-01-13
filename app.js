@@ -8,9 +8,21 @@ const ExpressError = require("./ExpressError");
 const asyncWrap = require("./utils/asyncWrap.js");
 const { reviewSchema } = require("./schema.js");
 const Review = require("./models/review.js");
+const session = require("express-session");
 
 const listings = require("./routes/listing.js");
 const reviews = require("./routes/review.js");
+
+const sessionOptions = {
+  secret: "mysupersecretcode",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  },
+};
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -20,6 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
+
+
+
 main()
   .then(() => {
     console.log("connected to DB");
