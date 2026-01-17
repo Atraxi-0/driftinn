@@ -6,7 +6,6 @@ const { listingSchema } = require("../schema.js");
 const ExpressError = require("../ExpressError");
 const mongoose = require("mongoose");
 
-
 const validateListing = (req, res, next) => {
   let { error } = listingSchema.validate(req.body);
   if (error) {
@@ -16,7 +15,6 @@ const validateListing = (req, res, next) => {
     next();
   }
 };
-
 
 //main
 router.get(
@@ -39,6 +37,7 @@ router.post(
   asyncWrap(async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
+    req.flash("success", "New listing created!");
     res.redirect("/listings");
     // console.log(listing);
   })
@@ -58,8 +57,7 @@ router.get(
     }
     res.render("listings/show", { listing });
   })
-); 
-
+);
 
 //Update
 router.get(
@@ -77,6 +75,7 @@ router.put(
   asyncWrap(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, req.body.listing);
+    req.flash("success", "Listing updated successfully!");
     res.redirect(`/listings/${id}`);
   })
 );
@@ -88,6 +87,7 @@ router.delete(
     let { id } = req.params;
     let deleteListing = await Listing.findByIdAndDelete(id);
     console.log(deleteListing);
+    req.flash("success", "Listing deleted successfully!");
     res.redirect("/listings");
   })
 );

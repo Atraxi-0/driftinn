@@ -29,7 +29,12 @@
     <!-- <h1>Allons-y Travel</h1> -->
     <%- include("../includes/navbar") %>
 
-    <div class="container"><%- body %></div>
+    
+    <div class="container">
+      <div class="flash-messages">
+        <%- include("../includes/flash") %>
+      </div>
+      <%- body %></div>
 
     <%- include("../includes/footer") %>
     <script

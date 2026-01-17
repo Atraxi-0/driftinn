@@ -25,7 +25,7 @@ router.post(
 
     const listing = await Listing.findById(id);
     if (!listing) {
-      //   req.flash("error", "Listing not found!");
+      req.flash("error", "Listing not found!");
       return res.redirect("/listings");
     }
 
@@ -35,7 +35,7 @@ router.post(
     await newReview.save();
     await listing.save();
 
-    console.log("New review saved successfully");
+    req.flash("success", "Review Added");
     res.redirect(`/listings/${id}`);
   })
 );
@@ -49,6 +49,7 @@ router.delete(
       $pull: { reviews: reviewId },
     });
     await Review.findByIdAndDelete(reviewId);
+    req.flash("success", "Review Deleted");
     res.redirect(`/listings/${id}`);
   })
 );

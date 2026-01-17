@@ -13,7 +13,8 @@ module.exports.listingSchema = joi.object({
           url: joi.string().uri().allow("", null),
           filename: joi.string().allow("", null),
         })
-        .optional(),
+        .optional()
+        .empty(""),
     })
     .required(),
 });
